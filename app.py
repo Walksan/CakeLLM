@@ -3,14 +3,24 @@ import streamlit as st
 from huggingface_hub import hf_hub_download
 from llama_cpp import Llama
 
-# 🔮 Interface Settings (English)
-st.set_page_config(page_title="CakeLLM Interface", page_icon="🍰")
-st.title("🍰 CakeLLM Assistant")
+# 🔮 Page Config
+st.set_page_config(page_title="CakeLLM", page_icon="🍰")
+
+# 🌍 Dil Seçimi
+lang = st.sidebar.selectbox("Select Language / Dil Seçin", ["English", "Türkçe"])
+
+# Dil sözlüğü
+texts = {
+    "English": {"title": "🍰 CakeLLM Assistant", "input": "Type your message...", "working": "Working on it...", "error": "Model could not be loaded.", "server_err": "Server is under heavy load, please try again!"},
+    "Türkçe": {"title": "🍰 CakeLLM Asistanı", "input": "Mesajını yaz...", "working": "Çalışıyor...", "error": "Model yüklenemedi.", "server_err": "Sunucu çok zorlandı, tekrar dene!"}
+}
+
+st.title(texts[lang]["title"])
 
 REPO_ID = "walkmane/AlphaAI"
 MODEL_FILE = "ALPHA-1.3-3b- stable_version Q4_K_M.gguf"
 
-# 🛑 SYSTEM PROMPT UPDATED
+# 🛑 SYSTEM PROMPT (Değişmez)
 SYSTEM_PROMPT = "You are the CakeLLM language model trained by Alpha AI; your task is to assist. Be realistic, friendly, and natural. Use emojis sparingly. Keep responses concise and avoid robotic language."
 
 @st.cache_resource
@@ -28,7 +38,7 @@ def load_model():
         )
         return llm
     except Exception as e:
-        st.error(f"Error loading model: {str(e)}")
+        st.error(f"Error: {str(e)}")
         return None
 
 llm = load_model()
@@ -40,7 +50,7 @@ for msg in st.session_state.messages:
     with st.chat_message(msg["role"]):
         st.markdown(msg["content"])
 
-if prompt := st.chat_input("Type your message..."):
+if prompt := st.chat_input(texts[lang]["input"]):
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
         st.markdown(prompt)
@@ -57,20 +67,15 @@ if prompt := st.chat_input("Type your message..."):
         
         try:
             if llm:
-                stream = llm(
-                    full_prompt, 
-                    max_tokens=150, 
-                    temperature=0.7, 
-                    stream=True 
-                )
-                for chunk in stream:
-                    content = chunk["choices"][0]["text"]
-                    full_response += content
-                    message_placeholder.markdown(full_response + "▌")
-                message_placeholder.markdown(full_response)
+                with st.spinner(texts[lang]["working"]):
+                    stream = llm(full_prompt, max_tokens=150, temperature=0.7, stream=True)
+                    for chunk in stream:
+                        full_response += chunk["choices"][0]["text"]
+                        message_placeholder.markdown(full_response + "▌")
+                    message_placeholder.markdown(full_response)
             else:
-                message_placeholder.markdown("Model could not be loaded.")
-        except Exception as e:
-            message_placeholder.markdown("Server is under heavy load, please try again!")
+                message_placeholder.markdown(texts[lang]["error"])
+        except Exception:
+            message_placeholder.markdown(texts[lang]["server_err"])
             
     st.session_state.messages.append({"role": "assistant", "content": full_response})
