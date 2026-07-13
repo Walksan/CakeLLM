@@ -2,9 +2,7 @@ import os
 import streamlit as st
 from huggingface_hub import hf_hub_download
 from llama_cpp import Llama
-import time
 
-# 🔮 Arayüz ayarları
 st.set_page_config(page_title="AlphaAI", page_icon="🔮")
 st.title("AlphaAI")
 
@@ -15,17 +13,14 @@ MODEL_FILE = "ALPHA-1.3-3b- stable_version Q4_K_M.gguf"
 def load_model():
     hf_token = os.environ.get("HF_TOKEN", None)
     try:
-        model_path = hf_hub_download(
-            repo_id=REPO_ID, 
-            filename=MODEL_FILE,
-            token=hf_token
-        )
+        model_path = hf_hub_download(repo_id=REPO_ID, filename=MODEL_FILE, token=hf_token)
+        # RAM'i korumak için n_batch'i düşürdüm ve n_threads'i 2'ye çektim
         llm = Llama(
             model_path=model_path,
-            n_ctx=2048,        
-            n_threads=4,       
+            n_ctx=1024,        
+            n_threads=2,       
             n_gpu_layers=0,    
-            n_batch=512,
+            n_batch=128,       
             verbose=False
         )
         return llm
@@ -51,33 +46,24 @@ if prompt := st.chat_input("Mesajını yaz..."):
         message_placeholder = st.empty()
         full_response = ""
         
-        # Canlı akış için stream=True kullanıyoruz
         llama_prompt = f"<|start_header_id|>user<|end_header_id|>\n\n{prompt}<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n"
         
         try:
             if llm:
-                # stream=True ile kelime kelime alıyoruz
                 stream = llm(
                     llama_prompt, 
-                    max_tokens=256, 
+                    max_tokens=150, # Yanıt uzunluğunu kıstım, sunucu çökmesin diye
                     temperature=0.7, 
-                    top_p=0.9, 
-                    repeat_penalty=1.1,
-                    stop=["<|eot_id|>"], 
-                    echo=False,
                     stream=True 
                 )
-                
                 for chunk in stream:
                     content = chunk["choices"][0]["text"]
                     full_response += content
-                    # Canlı yazma efekti
                     message_placeholder.markdown(full_response + "▌")
-                
                 message_placeholder.markdown(full_response)
             else:
                 message_placeholder.markdown("Model yüklenemedi.")
         except Exception as e:
-            message_placeholder.markdown(f"Hata: {str(e)}")
+            message_placeholder.markdown("Sunucu çok zorlandı, bir daha dene kankooo!")
             
     st.session_state.messages.append({"role": "assistant", "content": full_response})
