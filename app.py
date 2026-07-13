@@ -14,18 +14,18 @@ def load_model():
     hf_token = os.environ.get("HF_TOKEN", None)
     try:
         model_path = hf_hub_download(repo_id=REPO_ID, filename=MODEL_FILE, token=hf_token)
-        # RAM'i korumak için n_batch'i düşürdüm ve n_threads'i 2'ye çektim
+        # Reduced n_batch and set n_threads to 2 to save RAM
         llm = Llama(
             model_path=model_path,
-            n_ctx=1024,        
-            n_threads=2,       
-            n_gpu_layers=0,    
-            n_batch=128,       
+            n_ctx=1024,
+            n_threads=2,
+            n_gpu_layers=0,
+            n_batch=128,
             verbose=False
         )
         return llm
     except Exception as e:
-        st.error(f"Hata: {str(e)}")
+        st.error(f"Error: {str(e)}")
         return None
 
 llm = load_model()
@@ -37,7 +37,7 @@ for msg in st.session_state.messages:
     with st.chat_message(msg["role"]):
         st.markdown(msg["content"])
 
-if prompt := st.chat_input("Mesajını yaz..."):
+if prompt := st.chat_input("Type your message..."):
     with st.chat_message("user"):
         st.markdown(prompt)
     st.session_state.messages.append({"role": "user", "content": prompt})
@@ -45,16 +45,16 @@ if prompt := st.chat_input("Mesajını yaz..."):
     with st.chat_message("assistant"):
         message_placeholder = st.empty()
         full_response = ""
-        
+
         llama_prompt = f"<|start_header_id|>user<|end_header_id|>\n\n{prompt}<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n"
-        
+
         try:
             if llm:
                 stream = llm(
-                    llama_prompt, 
-                    max_tokens=150, # Yanıt uzunluğunu kıstım, sunucu çökmesin diye
-                    temperature=0.7, 
-                    stream=True 
+                    llama_prompt,
+                    max_tokens=150,  # Limited response length to avoid server crashes
+                    temperature=0.7,
+                    stream=True
                 )
                 for chunk in stream:
                     content = chunk["choices"][0]["text"]
@@ -62,8 +62,8 @@ if prompt := st.chat_input("Mesajını yaz..."):
                     message_placeholder.markdown(full_response + "▌")
                 message_placeholder.markdown(full_response)
             else:
-                message_placeholder.markdown("Model yüklenemedi.")
+                message_placeholder.markdown("Failed to load the model.")
         except Exception as e:
-            message_placeholder.markdown("Sunucu çok zorlandı, bir daha dene kankooo!")
-            
+            message_placeholder.markdown("The server is under heavy load. Please try again!")
+
     st.session_state.messages.append({"role": "assistant", "content": full_response})
