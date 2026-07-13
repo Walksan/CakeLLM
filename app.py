@@ -10,7 +10,7 @@ st.caption("Tamamen CPU üzerinde çalışan, kararlı ve emoji spamsız CakeLLM
 
 # 📂 Model bilgileri ve main branch'indeki boşluklu stabil sürüm adı
 REPO_ID = "walkmane/AlphaAI"
-MODEL_FILE = "ALPHA-1.3-3b- stable_version Q4_K_M.gguf"
+MODEL_FILE = "ALPHA-1.3-3b-%20stable_version%20Q4_K_M.gguf "
 
 # Modeli sadece bir kez yüklemek için önbelleğe (cache) alıyoruz
 @st.cache_resource
