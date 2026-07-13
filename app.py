@@ -10,7 +10,7 @@ st.title("🔮 AlphaAI Arayüzü (ALPHA-1.3-3b-stable)")
 # 🛠️ GİTHUB'DAKİ LİNKTE GÖRDÜĞÜM TAM İSİM:
 # ALPHA-1.3-3b-%20stable_version%20Q4_K_M.gguf
 REPO_ID = "walkmane/AlphaAI"
-MODEL_FILE = "ALPHA-1.3-3b-%20stable_version%20Q4_K_M.gguf"
+MODEL_FILE = "ALPHA-1.3-3b-%stable_version%Q4_K_M.gguf"
 
 @st.cache_resource
 def load_model():
