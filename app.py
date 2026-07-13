@@ -9,12 +9,14 @@ st.title("AlphaAI")
 REPO_ID = "walkmane/AlphaAI"
 MODEL_FILE = "ALPHA-1.3-3b- stable_version Q4_K_M.gguf"
 
+# 🛑 CHARACTER SETTINGS ARE FIXED INSIDE THE CODE
+SYSTEM_PROMPT = "You are the CakeLLM language model trained by Alpha AI; your task is to assist. "
+
 @st.cache_resource
 def load_model():
     hf_token = os.environ.get("HF_TOKEN", None)
     try:
         model_path = hf_hub_download(repo_id=REPO_ID, filename=MODEL_FILE, token=hf_token)
-        # Reduced n_batch and set n_threads to 2 to save RAM
         llm = Llama(
             model_path=model_path,
             n_ctx=1024,
@@ -33,6 +35,7 @@ llm = load_model()
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
+# Keep the chat history clean
 for msg in st.session_state.messages:
     with st.chat_message(msg["role"]):
         st.markdown(msg["content"])
@@ -46,13 +49,14 @@ if prompt := st.chat_input("Type your message..."):
         message_placeholder = st.empty()
         full_response = ""
 
-        llama_prompt = f"<|start_header_id|>user<|end_header_id|>\n\n{prompt}<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n"
+        # 🔗 Combine the prompt with the system instruction
+        llama_prompt = f"<|start_header_id|>system<|end_header_id|>\n\n{SYSTEM_PROMPT}<|eot_id|><|start_header_id|>user<|end_header_id|>\n\n{prompt}<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n"
 
         try:
             if llm:
                 stream = llm(
                     llama_prompt,
-                    max_tokens=150,  # Limited response length to avoid server crashes
+                    max_tokens=150,
                     temperature=0.7,
                     stream=True
                 )
