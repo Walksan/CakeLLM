@@ -11,8 +11,8 @@ lang = st.sidebar.selectbox("Select Language / Dil Seçin", ["English", "Türkç
 
 # Dil sözlüğü
 texts = {
-    "English": {"title": "🍰 CakeLLM Assistant", "input": "Type your message...", "working": "Working on it...", "error": "Model could not be loaded.", "server_err": "Server is under heavy load, please try again!"},
-    "Türkçe": {"title": "🍰 CakeLLM Asistanı", "input": "Mesajını yaz...", "working": "Çalışıyor...", "error": "Model yüklenemedi.", "server_err": "Sunucu çok zorlandı, tekrar dene!"}
+    "English": {"title": "🍰 CakeLLM Assistant", "input": "Try prompt...", "working": "Running ...", "error": "Model could not be loaded.", "server_err": "Server is under heavy load, please try again!"},
+    "Türkçe": {"title": "🍰 CakeLLM Asistanı", "input": "Komut deneyin...", "working": "Çalışıyor...", "error": "Model yüklenemedi.", "server_err": "Sunucu çok zorlandı, tekrar dene!"}
 }
 
 st.title(texts[lang]["title"])
