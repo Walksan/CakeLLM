@@ -7,7 +7,7 @@ from llama_cpp import Llama
 st.set_page_config(page_title="CakeLLM", page_icon="🍰")
 
 # 🌍 Dil Seçimi
-lang = st.sidebar.selectbox("Select Language / Dil Seçin", ["English", "Türkçe"])
+lang = st.sidebar.selectbox("Select Language / Dil Seçin", ["English", "Turkish"])
 
 # Dil sözlüğü
 texts = {
@@ -68,7 +68,7 @@ if prompt := st.chat_input(texts[lang]["input"]):
         try:
             if llm:
                 with st.spinner(texts[lang]["working"]):
-                    stream = llm(full_prompt, max_tokens=150, temperature=0.7, stream=True)
+                    stream = llm(full_prompt, max_tokens=250, temperature=0.9, stream=True)
                     for chunk in stream:
                         full_response += chunk["choices"][0]["text"]
                         message_placeholder.markdown(full_response + "▌")
